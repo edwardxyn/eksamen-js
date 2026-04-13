@@ -27,6 +27,11 @@ async function fetchData() {
 //Display function
 function displayData(data) {
     output.innerHTML = ''
+    output.style.display = 'grid'
+    output.style.gridTemplateColumns = 'repeat(4, 1fr)'
+    output.style.gap = '15px'
+    output.style.padding = '15px'
+
 
     data.forEach(student => {
         const card = createCard(student)
@@ -37,6 +42,10 @@ function displayData(data) {
 // Create Card
 function createCard(student) {
     const card = document.createElement('div')
+    card.style.border = '1px solid gray'
+    card.style.borderRadius = '8px'
+    card.style.padding = '15px'
+    card.style.textAlign = 'center'
 
     // Image
     const img = document.createElement('img')
@@ -45,6 +54,10 @@ function createCard(student) {
     } else {
         img.src = DEFAULT_IMAGE
     }
+    img.style.width = '150px'
+    img.style.height = '200px'
+    img.style.objectFit = 'cover'
+    img.style.borderRadius = '8px'
     card.appendChild(img)
 
     // Name
