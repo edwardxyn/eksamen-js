@@ -7,8 +7,9 @@ const output = document.getElementById('output')
 
 // Store all students so we can filter without re-fetching
 let allStudents = []
-// Track active house filter
+// Track active house/age filter
 let activeHouse = null
+let activeAgeSorting = null
 
 //House colors
 const houseColors = {
@@ -43,7 +44,7 @@ async function fetchData() {
 
         const data = await response.json()
         allStudents = data
-        displayData(allStudents)
+        updateDisplay()
 
     } catch (error) {
         console.error('something went wrong:', error)
@@ -69,12 +70,8 @@ function displayData(data) {
 
 // Filter by house
 function filterByHouse(house) {
-    if (house) {
-        const filtered = allStudents.filter(student => student.house === house)
-        displayData(filtered)
-    } else {
-        displayData(allStudents)
-    }
+    activeHouse = house
+    updateDisplay()
 }
 
 // Create house filter cards
@@ -100,10 +97,8 @@ function createHouseFilters() {
 
         houseCard.addEventListener('click', function () {
             if (activeHouse === house) {
-                activeHouse = null
-                displayData(allStudents)
+                filterByHouse(null)
             } else {
-                activeHouse = house
                 filterByHouse(house)
             }
         })
@@ -112,26 +107,33 @@ function createHouseFilters() {
     })
 }
 
-// Sort by age
-function sortByAge(direction) {
+// One function that handles both filtering and sorting
+function updateDisplay() {
     let students = [...allStudents]
 
-    // If a house filter is active, filter first
+    // Filter by house if active
     if (activeHouse) {
         students = students.filter(student => student.house === activeHouse)
     }
 
-    if (direction === 'youngest') {
+    // Sort by age if active
+    if (activeAgeSorting === 'youngest') {
         students.sort(function (a, b) {
             return b.yearOfBirth - a.yearOfBirth
         })
-    } else if (direction === 'oldest') {
+    } else if (activeAgeSorting === 'oldest') {
         students.sort(function (a, b) {
             return a.yearOfBirth - b.yearOfBirth
         })
     }
 
     displayData(students)
+}
+
+function handleAgeSorting() {
+    const dropdown = document.getElementById('sorting-dropdown')
+    activeAgeSorting = dropdown.value || null
+    updateDisplay()
 }
 
 // Create Card
@@ -195,11 +197,4 @@ function createCard(student) {
 // Start
 createHouseFilters()
 fetchData()
-
-document.getElementById('sorting-dropdown').addEventListener('change', function () {
-    if (this.value) {
-        sortByAge(this.value)
-    } else {
-        displayData(allStudents)
-    }
-})
+document.getElementById('sorting-dropdown').addEventListener('change', handleAgeSorting)
