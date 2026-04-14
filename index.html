@@ -9,7 +9,24 @@
 <body>
     <header></header>
     <main>
-        <div id="house-filters"></div>
+        <h1>Filter By House</h1>
+        <div id="house-filters">
+        </div>
+        <div id="student-form">
+            <h2>Create Your Own Hogwarts Student</h2>
+            <input type="text" id="input-name" placeholder="Name">
+            <input type="number" id="input-age" placeholder="Year of birth (e.g. 1980)">
+            <select id="input-house">
+                <option value="Gryffindor">Gryffindor</option>
+                <option value="Slytherin">Slytherin</option>
+                <option value="Ravenclaw">Ravenclaw</option>
+                <option value="Hufflepuff">Hufflepuff</option>
+            </select>
+            <input type="text" id="input-wood" placeholder="Wand wood">
+            <input type="text" id="input-core" placeholder="Wand core">
+            <input type="number" id="input-length" placeholder="Wand length">
+            <button id="create-btn">Create Student</button>
+        </div>
         <select id="sorting-dropdown">
             <option value="">Sort by age</option>
             <option value="youngest">Youngest first</option>

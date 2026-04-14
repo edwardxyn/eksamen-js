@@ -1,4 +1,4 @@
-// Config
+// ---- CONFIG AND VARIABLES ----
 const API_URL = 'https://hp-api.onrender.com/api/characters/students'
 const DEFAULT_IMAGE = 'https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg'
 
@@ -11,7 +11,6 @@ let allStudents = []
 let activeHouse = null
 let activeAgeSorting = null
 
-//House colors
 const houseColors = {
     Gryffindor: '#740001',
     Slytherin: '#1a472a',
@@ -19,20 +18,20 @@ const houseColors = {
     Hufflepuff: '#ecb939',
 }
 
-// Helper: create a text element
+// ---- HELPER FUNCTIONS ----
 function createTextElement(tag, text) {
     const element = document.createElement(tag)
     element.textContent = text
     return element
 }
 
-// Helper: style an element
 function styleElement(element, styles) {
     for (let key in styles) {
         element.style[key] = styles[key]
     }
 }
 
+// ---- DATA FUNCTIONS ----
 //Fetch function
 async function fetchData() {
     try {
@@ -44,6 +43,7 @@ async function fetchData() {
 
         const data = await response.json()
         allStudents = data
+        loadCustomStudents()
         updateDisplay()
 
     } catch (error) {
@@ -52,7 +52,22 @@ async function fetchData() {
     }  
 }
 
-//Display function
+function saveCustomStudents() {
+    const customStudents = allStudents.filter(student => student.custom === true)
+    localStorage.setItem('customStudents', JSON.stringify(customStudents))
+}
+
+function loadCustomStudents() {
+    const saved = localStorage.getItem('customStudents')
+    if (saved) {
+        const customStudents = JSON.parse(saved)
+        customStudents.forEach(student => {
+            allStudents.push(student)
+        })
+    }
+}
+
+// ---- DISPLAY FUNCTIONS ----
 function displayData(data) {
     output.innerHTML = ''
     styleElement(output, {
@@ -68,46 +83,6 @@ function displayData(data) {
     })
 }
 
-// Filter by house
-function filterByHouse(house) {
-    activeHouse = house
-    updateDisplay()
-}
-
-// Create house filter cards
-function createHouseFilters() {
-    const filterContainer = document.getElementById('house-filters')
-    styleElement(filterContainer, {
-        display: 'flex',
-        gap: '15px',
-        padding: '20px'
-    })
-
-    const houses = ['Gryffindor', 'Slytherin', 'Ravenclaw', 'Hufflepuff']
-
-    houses.forEach(house => {
-        const houseCard = createTextElement('div', house)
-        styleElement(houseCard, {
-            padding: '15px 30px',
-            backgroundColor: houseColors[house],
-            color: 'white',
-            borderRadius: '8px',
-            cursor: 'pointer',
-        })
-
-        houseCard.addEventListener('click', function () {
-            if (activeHouse === house) {
-                filterByHouse(null)
-            } else {
-                filterByHouse(house)
-            }
-        })
-
-        filterContainer.appendChild(houseCard)
-    })
-}
-
-// One function that handles both filtering and sorting
 function updateDisplay() {
     let students = [...allStudents]
 
@@ -128,12 +103,6 @@ function updateDisplay() {
     }
 
     displayData(students)
-}
-
-function handleAgeSorting() {
-    const dropdown = document.getElementById('sorting-dropdown')
-    activeAgeSorting = dropdown.value || null
-    updateDisplay()
 }
 
 // Create Card
@@ -194,7 +163,91 @@ function createCard(student) {
     return card
 }
 
+function createHouseFilters() {
+    const filterContainer = document.getElementById('house-filters')
+    styleElement(filterContainer, {
+        display: 'flex',
+        gap: '15px',
+        padding: '20px'
+    })
+
+    const houses = ['Gryffindor', 'Slytherin', 'Ravenclaw', 'Hufflepuff']
+
+    houses.forEach(house => {
+        const houseCard = createTextElement('div', house)
+        styleElement(houseCard, {
+            padding: '15px 30px',
+            backgroundColor: houseColors[house],
+            color: 'white',
+            borderRadius: '8px',
+            cursor: 'pointer',
+        })
+
+        houseCard.addEventListener('click', function () {
+            if (activeHouse === house) {
+                filterByHouse(null)
+            } else {
+                filterByHouse(house)
+            }
+        })
+
+        filterContainer.appendChild(houseCard)
+    })
+}
+
+// ---- USER ACTION ----
+function filterByHouse(house) {
+    activeHouse = house
+    updateDisplay()
+}
+
+function handleAgeSorting() {
+    const dropdown = document.getElementById('sorting-dropdown')
+    activeAgeSorting = dropdown.value || null
+    updateDisplay()
+}
+
+function createStudent() {
+    const name = document.getElementById('input-name').value
+    const yearOfBirth = document.getElementById('input-age').value
+    const house = document.getElementById('input-house').value
+    const wood = document.getElementById('input-wood').value
+    const core = document.getElementById('input-core').value
+    const length = document.getElementById('input-length').value
+ 
+    if (!name || !yearOfBirth || !house || !wood) {
+        alert('Please fill in all fields')
+        return
+    }
+ 
+    const newStudent = {
+        name: name,
+        yearOfBirth: Number(yearOfBirth),
+        house: house,
+        image: DEFAULT_IMAGE,
+        alternate_names: [],
+        wand: {
+            wood: wood,
+            core: core,
+            length: length
+        },
+        custom: true
+    }
+ 
+    allStudents.push(newStudent)
+    saveCustomStudents()
+    updateDisplay()
+ 
+    // Clear inputs
+    document.getElementById('input-name').value = ''
+    document.getElementById('input-age').value = ''
+    document.getElementById('input-wood').value = ''
+    document.getElementById('input-core').value = ''
+    document.getElementById('input-length').value = ''
+}
+
 // Start
 createHouseFilters()
 fetchData()
 document.getElementById('sorting-dropdown').addEventListener('change', handleAgeSorting)
+document.getElementById('create-btn').addEventListener('click', createStudent)
