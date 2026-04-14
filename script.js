@@ -7,13 +7,15 @@ const output = document.getElementById('output')
 
 // Store all students so we can filter without re-fetching
 let allStudents = []
+// Track active house filter
+let activeHouse = null
 
 //House colors
 const houseColors = {
     Gryffindor: '#740001',
     Slytherin: '#1a472a',
     Ravenclaw: '#0e1a40',
-    Hufflepuff: '#ecb939'
+    Hufflepuff: '#ecb939',
 }
 
 // Helper: create a text element
@@ -75,6 +77,41 @@ function filterByHouse(house) {
     }
 }
 
+// Create house filter cards
+function createHouseFilters() {
+    const filterContainer = document.getElementById('house-filters')
+    styleElement(filterContainer, {
+        display: 'flex',
+        gap: '15px',
+        padding: '20px'
+    })
+
+    const houses = ['Gryffindor', 'Slytherin', 'Ravenclaw', 'Hufflepuff']
+
+    houses.forEach(house => {
+        const houseCard = createTextElement('div', house)
+        styleElement(houseCard, {
+            padding: '15px 30px',
+            backgroundColor: houseColors[house],
+            color: 'white',
+            borderRadius: '8px',
+            cursor: 'pointer',
+        })
+
+        houseCard.addEventListener('click', function () {
+            if (activeHouse === house) {
+                activeHouse = null
+                displayData(allStudents)
+            } else {
+                activeHouse = house
+                filterByHouse(house)
+            }
+        })
+
+        filterContainer.appendChild(houseCard)
+    })
+}
+
 // Create Card
 function createCard(student) {
     const card = document.createElement('div')
@@ -134,4 +171,5 @@ function createCard(student) {
 }
 
 // Start
+createHouseFilters()
 fetchData()
