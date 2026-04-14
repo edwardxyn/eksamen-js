@@ -5,6 +5,31 @@ const DEFAULT_IMAGE = 'https://upload.wikimedia.org/wikipedia/commons/a/ac/Defau
 // DOM references
 const output = document.getElementById('output')
 
+// Store all students so we can filter without re-fetching
+let allStudents = []
+
+//House colors
+const houseColors = {
+    Gryffindor: '#740001',
+    Slytherin: '#1a472a',
+    Ravenclaw: '#0e1a40',
+    Hufflepuff: '#ecb939'
+}
+
+// Helper: create a text element
+function createTextElement(tag, text) {
+    const element = document.createElement(tag)
+    element.textContent = text
+    return element
+}
+
+// Helper: style an element
+function styleElement(element, styles) {
+    for (let key in styles) {
+        element.style[key] = styles[key]
+    }
+}
+
 //Fetch function
 async function fetchData() {
     try {
@@ -15,8 +40,8 @@ async function fetchData() {
         }
 
         const data = await response.json()
-        displayData(data)
-        console.log(data)
+        allStudents = data
+        displayData(allStudents)
 
     } catch (error) {
         console.error('something went wrong:', error)
@@ -27,11 +52,12 @@ async function fetchData() {
 //Display function
 function displayData(data) {
     output.innerHTML = ''
-    output.style.display = 'grid'
-    output.style.gridTemplateColumns = 'repeat(4, 1fr)'
-    output.style.gap = '15px'
-    output.style.padding = '15px'
-
+    styleElement(output, {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: '15px',
+        padding: '15px'
+    })
 
     data.forEach(student => {
         const card = createCard(student)
@@ -39,76 +65,70 @@ function displayData(data) {
     })
 }
 
+// Filter by house
+function filterByHouse(house) {
+    if (house) {
+        const filtered = allStudents.filter(student => student.house === house)
+        displayData(filtered)
+    } else {
+        displayData(allStudents)
+    }
+}
+
 // Create Card
 function createCard(student) {
     const card = document.createElement('div')
-    card.style.border = '1px solid gray'
-    card.style.borderRadius = '8px'
-    card.style.padding = '15px'
-    card.style.textAlign = 'center'
+    styleElement(card, {
+        border: '1px solid gray',
+        borderRadius: '8px',
+        padding: '15px',
+        textAlign: 'center',
+        color: 'white',
+        backgroundColor: houseColors[student.house] || '#333'
+    })
 
     // Image
     const img = document.createElement('img')
-    if (student.image) {
-        img.src = student.image
-    } else {
-        img.src = DEFAULT_IMAGE
-    }
-    img.style.width = '150px'
-    img.style.height = '200px'
-    img.style.objectFit = 'cover'
-    img.style.borderRadius = '8px'
+    img.src = student.image || DEFAULT_IMAGE
+    styleElement(img, {
+        width: '150px',
+        height: '200px',
+        objectFit: 'cover',
+        borderRadius: '8px'
+    })
     card.appendChild(img)
 
     // Name
-    const name = document.createElement('h2')
-    name.textContent = student.name
-    card.appendChild(name)
+    card.appendChild(createTextElement('h2', student.name))
 
     // Alternative names
-    const altNames = document.createElement('p')
-    if (student.alternate_names.length > null) {
-        altNames.textContent = 'Also known as: ' + student.alternate_names.join(', ')
+    if (student.alternate_names.length > 0) {
+        card.appendChild(createTextElement('p', 'Also known as: ' + student.alternate_names.join(', ')))
     } else {
-        altNames.textContent = 'No alternative names'
+        card.appendChild(createTextElement('p', 'No alternative names'))
     }
-    card.appendChild(altNames)
 
     // Age
-    const age = document.createElement('p')
     if (student.yearOfBirth) {
-        age.textContent = 'Born: ' + student.yearOfBirth
+        card.appendChild(createTextElement('p', 'Born: ' + student.yearOfBirth))
     } else {
-        age.textContent = 'Birth year unknown'
+        card.appendChild(createTextElement('p', 'Birth year unknown'))
     }
-    card.appendChild(age)
 
     // Wand info
-    const wand = document.createElement('p')
     if (student.wand && student.wand.wood) {
-        wand.textContent = 'Wand: ' + student.wand.wood + ', ' + student.wand.core + ', ' + student.wand.length + '"'
+        card.appendChild(createTextElement('p', 'Wand: ' + student.wand.wood + ', ' + student.wand.core + ', ' + student.wand.length + '"'))
     } else {
-        wand.textContent = 'Wand: Unknown'
+        card.appendChild(createTextElement('p', 'Wand: Unknown'))
     }
-    card.appendChild(wand)
 
     // House
-    const house = document.createElement('p')
-    house.textContent = 'House: ' + (student.house || 'Unknown')
-    card.appendChild(house)
+    card.appendChild(createTextElement('p', 'House: ' + (student.house || 'Unknown')))
 
     // Buttons
-    const saveBtn = document.createElement('button')
-    saveBtn.textContent = 'Save'
-    card.appendChild(saveBtn)
-
-    const deleteBtn = document.createElement('button')
-    deleteBtn.textContent = 'Delete'
-    card.appendChild(deleteBtn)
-
-    const editBtn = document.createElement('button')
-    editBtn.textContent = 'Edit'
-    card.appendChild(editBtn)
+    card.appendChild(createTextElement('button', 'Save'))
+    card.appendChild(createTextElement('button', 'Delete'))
+    card.appendChild(createTextElement('button', 'Edit'))
 
     return card
 }
