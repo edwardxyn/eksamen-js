@@ -112,6 +112,28 @@ function createHouseFilters() {
     })
 }
 
+// Sort by age
+function sortByAge(direction) {
+    let students = [...allStudents]
+
+    // If a house filter is active, filter first
+    if (activeHouse) {
+        students = students.filter(student => student.house === activeHouse)
+    }
+
+    if (direction === 'youngest') {
+        students.sort(function (a, b) {
+            return b.yearOfBirth - a.yearOfBirth
+        })
+    } else if (direction === 'oldest') {
+        students.sort(function (a, b) {
+            return a.yearOfBirth - b.yearOfBirth
+        })
+    }
+
+    displayData(students)
+}
+
 // Create Card
 function createCard(student) {
     const card = document.createElement('div')
@@ -173,3 +195,11 @@ function createCard(student) {
 // Start
 createHouseFilters()
 fetchData()
+
+document.getElementById('sorting-dropdown').addEventListener('change', function () {
+    if (this.value) {
+        sortByAge(this.value)
+    } else {
+        displayData(allStudents)
+    }
+})
