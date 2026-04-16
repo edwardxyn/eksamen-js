@@ -2,12 +2,9 @@
 const API_URL = 'https://hp-api.onrender.com/api/characters/students'
 const DEFAULT_IMAGE = 'https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg'
 
-// DOM references
 const output = document.getElementById('output')
 
-// Store all students so we can filter without re-fetching
 let allStudents = []
-// Track active house/age filter
 let activeHouse = null
 let activeAgeSorting = null
 
@@ -32,7 +29,6 @@ function styleElement(element, styles) {
 }
 
 // ---- DATA FUNCTIONS ----
-//Fetch function
 async function fetchData() {
     try {
         const response = await fetch(API_URL)
@@ -86,12 +82,10 @@ function displayData(data) {
 function updateDisplay() {
     let students = [...allStudents]
 
-    // Filter by house if active
     if (activeHouse) {
         students = students.filter(student => student.house === activeHouse)
     }
 
-    // Sort by age if active
     if (activeAgeSorting === 'youngest') {
         students.sort(function (a, b) {
             return b.yearOfBirth - a.yearOfBirth
@@ -105,7 +99,6 @@ function updateDisplay() {
     displayData(students)
 }
 
-// Create Card
 function createCard(student) {
     const card = document.createElement('div')
     styleElement(card, {
@@ -117,7 +110,6 @@ function createCard(student) {
         backgroundColor: houseColors[student.house] || '#333'
     })
 
-    // Image
     const img = document.createElement('img')
     img.src = student.image || DEFAULT_IMAGE
     styleElement(img, {
