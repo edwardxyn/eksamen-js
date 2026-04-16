@@ -71,6 +71,11 @@ function getFavorites() {
 
 function saveFavorite(student) {
     const favorites = getFavorites()
+
+    if (favorites.some(fav => fav.name === student.name)) {
+        alert('This student is already saved!')
+        return
+    }
  
     if (favorites.length >= 3) {
         alert('You can only save up to 3 students! Remove one first.')
