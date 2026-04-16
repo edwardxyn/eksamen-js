@@ -40,6 +40,7 @@ async function fetchData() {
         const data = await response.json()
         allStudents = data
         loadCustomStudents()
+        displayFavorites()
         updateDisplay()
 
     } catch (error) {
@@ -61,6 +62,31 @@ function loadCustomStudents() {
             allStudents.push(student)
         })
     }
+}
+
+function getFavorites() {
+    const saved = localStorage.getItem('favorites')
+    return saved ? JSON.parse(saved) : []
+}
+
+function saveFavorite(student) {
+    const favorites = getFavorites()
+ 
+    if (favorites.length >= 3) {
+        alert('You can only save up to 3 students! Remove one first.')
+        return
+    }
+ 
+    favorites.push(student)
+    localStorage.setItem('favorites', JSON.stringify(favorites))
+    displayFavorites()
+}
+
+function removeFavorite(name) {
+    let favorites = getFavorites()
+    favorites = favorites.filter(student => student.name !== name)
+    localStorage.setItem('favorites', JSON.stringify(favorites))
+    displayFavorites()
 }
 
 // ---- DISPLAY FUNCTIONS ----
@@ -148,7 +174,11 @@ function createCard(student) {
     card.appendChild(createTextElement('p', 'House: ' + (student.house || 'Unknown')))
 
     // Buttons
-    card.appendChild(createTextElement('button', 'Save'))
+    const saveBtn = createTextElement('button', 'Save')
+    saveBtn.addEventListener('click', function () {
+        saveFavorite(student)
+    })
+    card.appendChild(saveBtn)
     card.appendChild(createTextElement('button', 'Delete'))
     card.appendChild(createTextElement('button', 'Edit'))
 
@@ -184,6 +214,25 @@ function createHouseFilters() {
         })
 
         filterContainer.appendChild(houseCard)
+    })
+}
+
+function displayFavorites() {
+    const savedList = document.getElementById('saved-list')
+    savedList.innerHTML = ''
+    const favorites = getFavorites()
+ 
+    favorites.forEach(student => {
+        const item = document.createElement('div')
+        item.textContent = student.name + ' (' + (student.house || 'Unknown') + ')'
+ 
+        const removeBtn = createTextElement('button', 'Remove')
+        removeBtn.addEventListener('click', function () {
+            removeFavorite(student.name)
+        })
+ 
+        item.appendChild(removeBtn)
+        savedList.appendChild(item)
     })
 }
 
@@ -241,5 +290,6 @@ function createStudent() {
 // Start
 createHouseFilters()
 fetchData()
+displayFavorites()
 document.getElementById('sorting-dropdown').addEventListener('change', handleAgeSorting)
 document.getElementById('create-btn').addEventListener('click', createStudent)
