@@ -85,16 +85,37 @@ function removeFavorite(name) {
 }
 
 function deleteStudent(name) {
-    // Remove from allStudents array
     allStudents = allStudents.filter(student => student.name !== name)
 
-    // Remove from custom students in localStorage if they were custom
     saveCustomStudents()
 
-    // Remove from favorites in localStorage if they were favorited
     removeFavorite(name)
 
-    // Re-render everything
+    displayFavorites()
+    updateDisplay()
+}
+
+function updateStudent(oldName, updatedData) {
+    const student = allStudents.find(s => s.name === oldName)
+    if (student) {
+        student.name = updatedData.name
+        student.house = updatedData.house
+        student.yearOfBirth = updatedData.yearOfBirth
+    }
+
+    // Update localStorage for custom students
+    saveCustomStudents()
+
+    // Update localStorage for favorites
+    let favorites = getFavorites()
+    const favIndex = favorites.findIndex(fav => fav.name === oldName)
+    if (favIndex !== -1) {
+        favorites[favIndex].name = updatedData.name
+        favorites[favIndex].house = updatedData.house
+        favorites[favIndex].yearOfBirth = updatedData.yearOfBirth
+        localStorage.setItem('favorites', JSON.stringify(favorites))
+    }
+
     displayFavorites()
     updateDisplay()
 }
@@ -212,8 +233,56 @@ function createCard(student) {
         deleteStudent(student.name)
     })
     card.appendChild(deleteBtn)
-    
-    card.appendChild(createTextElement('button', 'Edit'))
+
+    const editBtn = createTextElement('button', 'Edit')
+    editBtn.addEventListener('click', function () {
+        card.innerHTML = ''
+
+        // Name input
+        const nameInput = document.createElement('input')
+        nameInput.type = 'text'
+        nameInput.value = student.name
+        card.appendChild(nameInput)
+
+        // House dropdown
+        const houseSelect = document.createElement('select')
+        const houses = ['Gryffindor', 'Slytherin', 'Ravenclaw', 'Hufflepuff']
+        houses.forEach(house => {
+            const option = document.createElement('option')
+            option.value = house
+            option.textContent = house
+            if (house === student.house) option.selected = true
+            houseSelect.appendChild(option)
+        })
+    card.appendChild(houseSelect)
+
+    // Age input
+    const ageInput = document.createElement('input')
+    ageInput.type = 'number'
+    ageInput.value = student.yearOfBirth || ''
+    card.appendChild(ageInput)
+
+    // Save button
+    const saveEditBtn = createTextElement('button', 'Save')
+    saveEditBtn.addEventListener('click', function () {
+        const oldName = student.name
+        updateStudent(oldName, {
+            name: nameInput.value,
+            house: houseSelect.value,
+            yearOfBirth: Number(ageInput.value) || null
+        })
+    })
+    card.appendChild(saveEditBtn)
+
+    // Cancel button
+    const cancelBtn = createTextElement('button', 'Cancel')
+    cancelBtn.addEventListener('click', function () {
+        updateDisplay()
+        displayFavorites()
+    })
+    card.appendChild(cancelBtn)
+})
+card.appendChild(editBtn)
 
     return card
 }
