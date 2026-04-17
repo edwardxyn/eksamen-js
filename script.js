@@ -83,6 +83,22 @@ function removeFavorite(name) {
     displayFavorites()
     updateDisplay()
 }
+
+function deleteStudent(name) {
+    // Remove from allStudents array
+    allStudents = allStudents.filter(student => student.name !== name)
+
+    // Remove from custom students in localStorage if they were custom
+    saveCustomStudents()
+
+    // Remove from favorites in localStorage if they were favorited
+    removeFavorite(name)
+
+    // Re-render everything
+    displayFavorites()
+    updateDisplay()
+}
+
 // ---- DISPLAY FUNCTIONS ----
 function displayData(data) {
     output.innerHTML = ''
@@ -190,7 +206,13 @@ function createCard(student) {
         }
     })
     card.appendChild(saveBtn)
-    card.appendChild(createTextElement('button', 'Delete'))
+
+    const deleteBtn = createTextElement('button', 'Delete')
+    deleteBtn.addEventListener('click', function () {
+        deleteStudent(student.name)
+    })
+    card.appendChild(deleteBtn)
+    
     card.appendChild(createTextElement('button', 'Edit'))
 
     return card
@@ -232,14 +254,14 @@ function displayFavorites() {
     const savedList = document.getElementById('saved-list')
     savedList.innerHTML = ''
     const favorites = getFavorites()
-
+    
     styleElement(savedList, {
         display: 'grid',
         gridTemplateColumns: 'repeat(3, 1fr)',
         gap: '15px',
         padding: '15px'
     })
-
+    
     favorites.forEach(student => {
         const card = createCard(student)
         savedList.appendChild(card)
@@ -300,6 +322,5 @@ function createStudent() {
 // Start
 createHouseFilters()
 fetchData()
-displayFavorites()
 document.getElementById('sorting-dropdown').addEventListener('change', handleAgeSorting)
 document.getElementById('create-btn').addEventListener('click', createStudent)
