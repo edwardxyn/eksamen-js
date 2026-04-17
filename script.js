@@ -71,17 +71,6 @@ function getFavorites() {
 
 function saveFavorite(student) {
     const favorites = getFavorites()
-
-    if (favorites.some(fav => fav.name === student.name)) {
-        alert('This student is already saved!')
-        return
-    }
- 
-    if (favorites.length >= 3) {
-        alert('You can only save up to 3 students! Remove one first.')
-        return
-    }
- 
     favorites.push(student)
     localStorage.setItem('favorites', JSON.stringify(favorites))
     displayFavorites()
@@ -92,8 +81,8 @@ function removeFavorite(name) {
     favorites = favorites.filter(student => student.name !== name)
     localStorage.setItem('favorites', JSON.stringify(favorites))
     displayFavorites()
+    updateDisplay()
 }
-
 // ---- DISPLAY FUNCTIONS ----
 function displayData(data) {
     output.innerHTML = ''
@@ -179,9 +168,26 @@ function createCard(student) {
     card.appendChild(createTextElement('p', 'House: ' + (student.house || 'Unknown')))
 
     // Buttons
-    const saveBtn = createTextElement('button', 'Save')
+    const saveBtn = createTextElement('button', '🤍')
+    const favorites = getFavorites()
+    if (favorites.some(fav => fav.name === student.name)) {
+    saveBtn.textContent = '❤️'
+    }
     saveBtn.addEventListener('click', function () {
-        saveFavorite(student)
+        const currentFavs = getFavorites()
+        const alreadySaved = currentFavs.some(fav => fav.name === student.name)
+
+        if (alreadySaved) {
+            removeFavorite(student.name)
+            saveBtn.textContent = '🤍'
+        } else {
+            if (currentFavs.length >= 3) {
+                alert('You can only save up to 3 students! Remove one first.')
+                return
+            }
+            saveFavorite(student)
+            saveBtn.textContent = '❤️'
+        }
     })
     card.appendChild(saveBtn)
     card.appendChild(createTextElement('button', 'Delete'))
@@ -226,18 +232,17 @@ function displayFavorites() {
     const savedList = document.getElementById('saved-list')
     savedList.innerHTML = ''
     const favorites = getFavorites()
- 
+
+    styleElement(savedList, {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: '15px',
+        padding: '15px'
+    })
+
     favorites.forEach(student => {
-        const item = document.createElement('div')
-        item.textContent = student.name + ' (' + (student.house || 'Unknown') + ')'
- 
-        const removeBtn = createTextElement('button', 'Remove')
-        removeBtn.addEventListener('click', function () {
-            removeFavorite(student.name)
-        })
- 
-        item.appendChild(removeBtn)
-        savedList.appendChild(item)
+        const card = createCard(student)
+        savedList.appendChild(card)
     })
 }
 
