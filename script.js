@@ -103,10 +103,8 @@ function updateStudent(oldName, updatedData) {
         student.yearOfBirth = updatedData.yearOfBirth
     }
 
-    // Update localStorage for custom students
     saveCustomStudents()
 
-    // Update localStorage for favorites
     let favorites = getFavorites()
     const favIndex = favorites.findIndex(fav => fav.name === oldName)
     if (favIndex !== -1) {
@@ -238,13 +236,11 @@ function createCard(student) {
     editBtn.addEventListener('click', function () {
         card.innerHTML = ''
 
-        // Name input
         const nameInput = document.createElement('input')
         nameInput.type = 'text'
         nameInput.value = student.name
         card.appendChild(nameInput)
 
-        // House dropdown
         const houseSelect = document.createElement('select')
         const houses = ['Gryffindor', 'Slytherin', 'Ravenclaw', 'Hufflepuff']
         houses.forEach(house => {
@@ -256,13 +252,11 @@ function createCard(student) {
         })
     card.appendChild(houseSelect)
 
-    // Age input
     const ageInput = document.createElement('input')
     ageInput.type = 'number'
     ageInput.value = student.yearOfBirth || ''
     card.appendChild(ageInput)
 
-    // Save button
     const saveEditBtn = createTextElement('button', 'Save')
     saveEditBtn.addEventListener('click', function () {
         const oldName = student.name
@@ -274,7 +268,6 @@ function createCard(student) {
     })
     card.appendChild(saveEditBtn)
 
-    // Cancel button
     const cancelBtn = createTextElement('button', 'Cancel')
     cancelBtn.addEventListener('click', function () {
         updateDisplay()
