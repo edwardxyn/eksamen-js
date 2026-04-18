@@ -1,10 +1,19 @@
 const CHARACTERS_URL = 'https://hp-api.onrender.com/api/characters'
 const SPELLS_URL = 'https://hp-api.onrender.com/api/spells'
 
+const DEFAULT_IMAGE = 'https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg'
+
 const game = document.getElementById('game')
 
 let allCharacters = []
 let allSpells = []
+
+const houseColors = {
+    Gryffindor: '#740001',
+    Slytherin: '#1a472a',
+    Ravenclaw: '#0e1a40',
+    Hufflepuff: '#ecb939',
+}
 
 // ---- HELPER FUNCTIONS ----
 function createTextElement(tag, text) {
@@ -25,9 +34,11 @@ async function fetchGameData() {
         const spellResponse = await fetch(SPELLS_URL)
 
         allCharacters = await characterResponse.json()
+        allCharacters = allCharacters.filter(c => c.house)
         allSpells = await spellResponse.json()
 
         startGame()
+        console.log(allCharacters)
 
     } catch (error) {
         console.error('Failed to load game data:', error)
@@ -36,62 +47,60 @@ async function fetchGameData() {
 
 function getRandomCharacter(array) {
     const index = Math.floor(Math.random() * array.length)
-    return array[index]
+    const character = array.splice(index, 1)[0]
+
+    if (character.hogwartsStudent === true) {
+        character.hp = 500
+    } else {
+        character.hp = 800
+    }
+
+    return character
 }
 
-function buildTeam() {
-    const teachers = allCharacters.filter(c => c.hogwartsStaff === true)
-    const students = allCharacters.filter(c => c.hogwartsStudent === true)
-
-    const team = []
-
-    const student1 = getRandomCharacter(students)
-    student1.hp = 500
-    team.push(student1)
-
-    const teacher = getRandomCharacter(teachers)
-    teacher.hp = 800
-    team.push(teacher)
-
-    const student2 = getRandomCharacter(students)
-    student2.hp = 500
-    team.push(student2)
-
-    console.log(teachers)
-    console.log(students)
-
-    return team
-}
-
-function displayTeam(team, label) {
-    const container = document.createElement('div')
-    container.appendChild(createTextElement('h2', label))
-    styleElement(container, {
-        display: 'flex',
-        gap: '15px',
-        padding: '15px'
+function displayCharacters(character, label) {
+    const card = document.createElement('div')
+    styleElement(card, {
+        padding: '15px',
+        borderRadius: '8px',
+        textAlign: 'center',
+        backgroundColor: houseColors[character.house] || '#333',
+        color: 'white'
     })
 
-    team.forEach(character => {
-        const card = document.createElement('div')
-
-        card.appendChild(createTextElement('h3', character.name))
-        card.appendChild(createTextElement('p', 'HP: ' + character.hp))
-
-        container.appendChild(card)
+    const img = document.createElement('img')
+    img.src = character.image || DEFAULT_IMAGE
+    styleElement(img, {
+        width: '150px',
+        height: '200px',
+        objectFit: 'cover',
+        borderRadius: '8px',
+        height: '250px',
+        width: '200px'
     })
+    card.appendChild(img)
+    card.appendChild(createTextElement('h3', label))
+    card.appendChild(createTextElement('h2', character.name))
+    card.appendChild(createTextElement('p', 'House: ' + character.house))
+    card.appendChild(createTextElement('p', 'HP: ' + character.hp))
 
-    game.appendChild(container)
+    game.appendChild(card)
 }
 
 function startGame() {
     game.innerHTML = ''
 
-    const team1 = buildTeam()
-    const team2 = buildTeam()
+    styleElement(game, {
+        display: 'flex',
+        justifyContent: 'space-around',
+        padding: '50px'
+    })
 
-    displayTeam(team1, 'Team 1')
-    displayTeam(team2, 'Team 2')
+    const player = getRandomCharacter(allCharacters)
+    const enemy = getRandomCharacter(allCharacters)
+
+    displayCharacters(player, 'Player')
+    displayCharacters(enemy, 'Enemy')
 }
 
 fetchGameData()
