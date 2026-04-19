@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Hogwarts Yearbook</title>
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <header></header>
+    <header>
+        <h1 class="site-title">⚡Hogwarts Yearbook⚡</h1>
+        <a href="game.html" class="play-btn">Play Our Game</a>
+    </header>
     <main>
-        <h1>Filter By House</h1>
-        <div id="house-filters"></div>
         <div id="saved-students">
             <h2>Saved Students (max 3)</h2>
             <div id="saved-list"></div>
@@ -30,11 +31,15 @@
             <input type="number" id="input-length" placeholder="Wand length">
             <button id="create-btn">Create Student</button>
         </div>
-        <select id="sorting-dropdown">
-            <option value="">Sort by age</option>
-            <option value="youngest">Youngest first</option>
-            <option value="oldest">Oldest first</option>
-        </select>
+        <h1>Filter By House</h1>
+        <div id="filter-row">
+            <div id="house-filters"></div>
+            <select id="sorting-dropdown">
+                <option value="">Sort by age</option>
+                <option value="youngest">Youngest first</option>
+                <option value="oldest">Oldest first</option>
+            </select>
+        </div>
         <div id="output"></div>
     </main>
     <script src="script.js"></script>
