@@ -89,8 +89,10 @@ function displayCharacters(character, slot) {
 }
 
 function startGame() {
-    const player = getRandomCharacter(allCharacters)
-    const enemy = getRandomCharacter(allCharacters)
+    const students = allCharacters.filter(c => c.hogwartsStudent === true)
+    player = getRandomCharacter(students)
+    const remaining = allCharacters.filter(c => c.name !== player.name)
+    enemy = getRandomCharacter(remaining)
 
     displayCharacters(player, playerSlot)
     displayCharacters(enemy, enemySlot)
