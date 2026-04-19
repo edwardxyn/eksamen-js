@@ -1,3 +1,4 @@
+// ---- CONFIG AND VARIABLES ----
 const CHARACTERS_URL = 'https://hp-api.onrender.com/api/characters'
 const SPELLS_URL = 'https://hp-api.onrender.com/api/spells'
 
@@ -11,7 +12,7 @@ let allSpells = []
 let player = null
 let enemy = null
 let playerHand = []
-const MAX_HAND = 10
+const MAX_HAND = 7
 
 const houseColors = {
     Gryffindor: '#740001',
@@ -31,7 +32,7 @@ const CARD_TYPES = {
     }
 }
 
-// ---- HELPERS ----
+// ---- HELPER FUNCTIONS ----
 function randomFrom(array) {
     return array[Math.floor(Math.random() * array.length)]
 }
@@ -182,6 +183,7 @@ function renderHand() {
     }
 }
 
+// ---- BATTLE ----
 function enemyAttack() {
     const spell = randomFrom(allSpells)
     let damage = randomDamage()
@@ -194,6 +196,81 @@ function enemyAttack() {
     logMessage(`${enemy.name} cast ${spell.name} for ${damage} damage!`, '#ff6b6b')
 }
 
+// ---- WIN / LOSE ----
+function nextEnemy() {
+    const remaining = allCharacters.filter(c => c.name !== player.name && c.name !== enemy.name)
+    enemy = getRandomCharacter(remaining)
+
+    displayCharacter(enemy, enemySlot)
+    logMessage(`⚡ New challenger: ${enemy.name}!`, 'gold')
+}
+
+function showGameOver() {
+    const overlay = document.createElement('div')
+    styleElement(overlay, {
+        position: 'fixed',
+        top: '0',
+        left: '0',
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: '20px',
+        zIndex: '100'
+    })
+
+    const title = createTextElement('h1', '💀 Game Over 💀')
+    styleElement(title, { color: 'gold', fontSize: '3rem', margin: '0' })
+    overlay.appendChild(title)
+
+    const subtitle = createTextElement('p', `You were defeated by ${enemy.name}`)
+    styleElement(subtitle, { color: 'white', fontSize: '1.2rem' })
+    overlay.appendChild(subtitle)
+
+    const buttonRow = document.createElement('div')
+    styleElement(buttonRow, { display: 'flex', gap: '20px', marginTop: '20px' })
+
+    const playAgainBtn = createTextElement('button', 'Play Again')
+    styleElement(playAgainBtn, {
+        padding: '15px 30px',
+        fontSize: '1.1rem',
+        backgroundColor: 'gold',
+        color: '#1a1a2e',
+        border: 'none',
+        borderRadius: '8px',
+        fontWeight: 'bold',
+        cursor: 'pointer'
+    })
+    playAgainBtn.addEventListener('click', function () {
+        location.reload()
+    })
+
+    const exitBtn = createTextElement('button', 'Back to Students')
+    styleElement(exitBtn, {
+        padding: '15px 30px',
+        fontSize: '1.1rem',
+        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+        color: 'white',
+        border: '2px solid white',
+        borderRadius: '8px',
+        fontWeight: 'bold',
+        cursor: 'pointer'
+    })
+    exitBtn.addEventListener('click', function () {
+        window.location.href = 'index.html'
+    })
+
+    buttonRow.appendChild(playAgainBtn)
+    buttonRow.appendChild(exitBtn)
+    overlay.appendChild(buttonRow)
+
+    document.body.appendChild(overlay)
+}
+
+// ---- TURN LOOP ----
 function playCard(index) {
     const cardData = playerHand[index]
     playerHand.splice(index, 1)
@@ -206,6 +283,8 @@ function playCard(index) {
 
     if (enemy.hp <= 0) {
         logMessage(`🏆 ${player.name} defeated ${enemy.name}!`, 'gold')
+        nextEnemy()
+        drawCard()
         renderHand()
         return
     }
@@ -222,6 +301,7 @@ function playCard(index) {
     if (player.hp <= 0) {
         logMessage(`${enemy.name} wins!`, 'gold')
         renderHand()
+        showGameOver()
         return
     }
 
@@ -229,6 +309,7 @@ function playCard(index) {
     renderHand()
 }
 
+// Start
 function startGame() {
     const students = allCharacters.filter(c => c.hogwartsStudent === true)
     player = getRandomCharacter(students)
