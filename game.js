@@ -8,6 +8,8 @@ const enemySlot = document.getElementById('enemy-slot')
 
 let allCharacters = []
 let allSpells = []
+let player = null
+let enemy = null
 
 const houseColors = {
     Gryffindor: '#740001',
@@ -17,16 +19,23 @@ const houseColors = {
 }
 
 // ---- HELPER FUNCTIONS ----
-function createTextElement(tag, text) {
-    const element = document.createElement(tag)
-    element.textContent = text
-    return element
+function randomDamage() {
+    return Math.floor(Math.random() * 31) + 50
 }
 
-function styleElement(element, styles) {
-    for (let key in styles) {
-        element.style[key] = styles[key]
-    }
+function randomFrom(array) {
+    return array[Math.floor(Math.random() * array.length)]
+}
+
+function logMessage(text, color) {
+    const log = document.getElementById('log')
+    const message = createTextElement('p', text)
+    styleElement(message, {
+        margin: '4px 0',
+        color: color || 'white'
+    })
+    //prepend makes messages appear from below
+    log.prepend(message)
 }
 
 async function fetchGameData() {
@@ -39,7 +48,6 @@ async function fetchGameData() {
         allSpells = await spellResponse.json()
 
         startGame()
-        console.log(allCharacters)
 
     } catch (error) {
         console.error('Failed to load game data:', error)
@@ -48,18 +56,20 @@ async function fetchGameData() {
 
 function getRandomCharacter(array) {
     const index = Math.floor(Math.random() * array.length)
-    const character = array.splice(index, 1)[0]
+    const character = array[index]
 
     if (character.hogwartsStudent === true) {
+        character.isTeacher = false
         character.hp = 500
     } else {
+        character.isTeacher = true
         character.hp = 800
     }
 
     return character
 }
 
-function displayCharacters(character, slot) {
+function displayCharacter(character, slot) {
     const card = document.createElement('div')
     styleElement(card, {
         padding: '10px',
@@ -88,87 +98,89 @@ function displayCharacters(character, slot) {
     slot.appendChild(card)
 }
 
-function setupLayout() {
-    styleElement(document.documentElement, {
-        margin: '0',
-        height: '100vh',
-        overflow: 'hidden'
-    })
+function generateCard() {
+    return {
+        name: randomFrom(allSpells).name,
+        damage: randomDamage()
+    }
+}
 
-    styleElement(document.body, {
-        margin: '0',
-        height: '100vh',
-        overflow: 'hidden',
-        fontFamily: 'system-ui, sans-serif',
-        backgroundColor: '#1a1a2e',
-        color: 'white',
-        display: 'flex',
-        flexDirection: 'column'
-    })
-
-    const main = document.querySelector('main')
-    styleElement(main, {
-        flex: '1',
-        display: 'flex',
-        flexDirection: 'row',
-        padding: '15px',
-        gap: '15px',
-        maxWidth: '1400px',
-        width: '100%',
-        margin: '0 auto',
-        minHeight: '0',
-        boxSizing: 'border-box'
-    })
-
-    const log = document.getElementById('log')
-    styleElement(log, {
-        width: '280px',
-        flexShrink: '0',
-        backgroundColor: 'rgba(0, 0, 0, 0.4)',
-        padding: '15px',
+function renderCard(cardData) {
+    const card = document.createElement('div')
+    styleElement(card, {
+        width: '140px',
+        height: '180px',
+        padding: '12px',
+        backgroundColor: '#2a2a4e',
+        border: '2px solid gold',
         borderRadius: '10px',
-        overflowY: 'auto',
-        fontSize: '0.9rem',
-        display: 'flex',
-        flexDirection: 'column-reverse',
-        boxSizing: 'border-box'
-    })
-
-    const rightSide = document.getElementById('right-side')
-    styleElement(rightSide, {
-        flex: '1',
+        cursor: 'pointer',
         display: 'flex',
         flexDirection: 'column',
-        gap: '15px',
-        minWidth: '0'
-    })
-
-    const arena = document.getElementById('arena')
-    styleElement(arena, {
-        display: 'flex',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        gap: '20px',
-        backgroundColor: 'rgba(0, 0, 0, 0.3)',
-        padding: '20px',
-        borderRadius: '15px'
-    })
-
-    const vs = document.getElementById('vs')
-    styleElement(vs, {
-        fontSize: '2.5rem',
-        fontWeight: 'bold',
-        color: 'gold'
-    })
-
-    const hand = document.getElementById('hand')
-    styleElement(hand, {
-        display: 'flex',
         justifyContent: 'center',
-        gap: '15px',
-        height: '200px',
-        flexShrink: '0'
+        textAlign: 'center',
+        boxSizing: 'border-box'
     })
+
+    const name = createTextElement('div', cardData.name)
+    styleElement(name, { fontWeight: 'bold', color: 'gold' })
+
+    const damage = createTextElement('div', cardData.damage + ' DMG')
+    styleElement(damage, { fontSize: '1.5rem', marginTop: '10px' })
+
+    card.appendChild(name)
+    card.appendChild(damage)
+
+    card.addEventListener('click', () => playCard(cardData))
+
+    return card
+}
+
+function drawHand() {
+    const hand = document.getElementById('hand')
+    hand.innerHTML = ''
+
+    for (let i = 0; i < 3; i++) {
+        hand.appendChild(renderCard(generateCard()))
+    }
+}
+
+function enemyAttack() {
+    const spell = randomFrom(allSpells)
+    let damage = randomDamage()
+
+    if (enemy.isTeacher === true) {
+        damage = Math.round(damage * 1.10)
+    }
+
+    player.hp -= damage
+    logMessage(`${enemy.name} cast ${spell.name} for ${damage} damage!`, '#ff6b6b')
+    
+}
+
+function playCard(cardData) {
+    enemy.hp -= cardData.damage
+    logMessage(`${player.name} cast ${cardData.name} for ${cardData.damage} damage!`, '#7fffd4')
+
+    displayCharacter(player, playerSlot)
+    displayCharacter(enemy, enemySlot)
+
+    if (enemy.hp <= 0) {
+        alert(`${player.name} wins!`)
+        return
+    }
+
+    enemyAttack()
+
+    displayCharacter(player, playerSlot)
+    displayCharacter(enemy, enemySlot)
+
+    if (player.hp <= 0) {
+        alert(`${enemy.name} wins!`)
+        return
+    }
+
+    drawHand()
 }
 
 function startGame() {
@@ -177,8 +189,12 @@ function startGame() {
     const remaining = allCharacters.filter(c => c.name !== player.name)
     enemy = getRandomCharacter(remaining)
 
-    displayCharacters(player, playerSlot)
-    displayCharacters(enemy, enemySlot)
+    displayCharacter(player, playerSlot)
+    displayCharacter(enemy, enemySlot)
+
+    logMessage(`⚡ Battle begins: ${player.name} vs ${enemy.name}!`, 'gold')
+
+    drawHand()
 }
 
 setupLayout()
