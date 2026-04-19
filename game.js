@@ -3,7 +3,8 @@ const SPELLS_URL = 'https://hp-api.onrender.com/api/spells'
 
 const DEFAULT_IMAGE = 'https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg'
 
-const game = document.getElementById('game')
+const playerSlot = document.getElementById('player-slot')
+const enemySlot = document.getElementById('enemy-slot')
 
 let allCharacters = []
 let allSpells = []
@@ -58,49 +59,41 @@ function getRandomCharacter(array) {
     return character
 }
 
-function displayCharacters(character, label) {
+function displayCharacters(character, slot) {
     const card = document.createElement('div')
     styleElement(card, {
-        padding: '15px',
+        padding: '10px',
         borderRadius: '8px',
         textAlign: 'center',
         backgroundColor: houseColors[character.house] || '#333',
-        color: 'white'
+        color: 'white',
+        width: '180px'
     })
 
     const img = document.createElement('img')
     img.src = character.image || DEFAULT_IMAGE
     styleElement(img, {
-        width: '150px',
-        height: '200px',
+        width: '120px',
+        height: '150px',
         objectFit: 'cover',
-        borderRadius: '8px',
-        height: '250px',
-        width: '200px'
+        borderRadius: '8px'
     })
+
     card.appendChild(img)
-    card.appendChild(createTextElement('h3', label))
     card.appendChild(createTextElement('h2', character.name))
     card.appendChild(createTextElement('p', 'House: ' + character.house))
     card.appendChild(createTextElement('p', 'HP: ' + character.hp))
 
-    game.appendChild(card)
+    slot.innerHTML = ''
+    slot.appendChild(card)
 }
 
 function startGame() {
-    game.innerHTML = ''
-
-    styleElement(game, {
-        display: 'flex',
-        justifyContent: 'space-around',
-        padding: '50px'
-    })
-
     const player = getRandomCharacter(allCharacters)
     const enemy = getRandomCharacter(allCharacters)
 
-    displayCharacters(player, 'Player')
-    displayCharacters(enemy, 'Enemy')
+    displayCharacters(player, playerSlot)
+    displayCharacters(enemy, enemySlot)
 }
 
 fetchGameData()

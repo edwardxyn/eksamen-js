@@ -1,0 +1,69 @@
+html, body {
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+    font-family: system-ui, sans-serif;
+    background: #1a1a2e;
+    color: white;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    padding: 15px;
+    gap: 15px;
+    max-width: 1400px;
+    width: 100%;
+    margin: 0 auto;
+    min-height: 0;
+}
+
+#log {
+    width: 280px;
+    flex-shrink: 0;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 15px;
+    border-radius: 10px;
+    overflow-y: auto;
+    font-size: 0.9rem;
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+#right-side {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-width: 0;
+}
+
+#arena {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    border-radius: 15px;
+}
+
+#vs {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: gold;
+}
+
+#hand {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    height: 200px;
+    flex-shrink: 0;
+}
