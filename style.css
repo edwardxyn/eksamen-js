@@ -1,0 +1,20 @@
+.play-btn {
+    background: gold;
+    color: #1a1a2e;
+    text-decoration: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+#output button,
+#saved-list button {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    margin: 3px;
+    border-radius: 6px;
+    cursor: pointer;
+}

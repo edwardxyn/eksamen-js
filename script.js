@@ -330,6 +330,97 @@ function displayFavorites() {
     })
 }
 
+function setupLayout() {
+    styleElement(document.body, {
+        margin: '0',
+        fontFamily: 'system-ui, sans-serif',
+        backgroundColor: '#1a1a2e',
+        color: 'white',
+        minHeight: '100vh'
+    })
+
+    const header = document.querySelector('header')
+    if (header) {
+        styleElement(header, {
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '20px 30px',
+            backgroundColor: 'rgba(0, 0, 0, 0.4)',
+            borderBottom: '2px solid gold'
+        })
+    }
+
+    const main = document.querySelector('main')
+    styleElement(main, {
+        maxWidth: '1400px',
+        margin: '0 auto',
+        padding: '20px'
+    })
+
+    document.querySelectorAll('h1, h2').forEach(heading => {
+        styleElement(heading, {
+            color: 'gold',
+            letterSpacing: '2px',
+            textAlign: 'center'
+        })
+    })
+
+    const savedStudents = document.getElementById('saved-students')
+    const studentForm = document.getElementById('student-form')
+    ;[savedStudents, studentForm].forEach(panel => {
+        if (panel) {
+            styleElement(panel, {
+                backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                padding: '20px',
+                borderRadius: '15px',
+                margin: '20px 0'
+            })
+        }
+    })
+
+    document.querySelectorAll('input, select').forEach(el => {
+        styleElement(el, {
+            backgroundColor: 'rgba(0, 0, 0, 0.4)',
+            color: 'white',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            padding: '10px 14px',
+            margin: '6px',
+            borderRadius: '8px',
+            fontFamily: 'inherit',
+            fontSize: '0.95rem'
+        })
+    })
+
+    const createBtn = document.getElementById('create-btn')
+    if (createBtn) {
+        styleElement(createBtn, {
+            display: 'block',
+            margin: '15px auto 0',
+            padding: '12px 30px',
+            backgroundColor: 'gold',
+            color: '#1a1a2e',
+            border: 'none',
+            borderRadius: '8px',
+            fontWeight: 'bold',
+            fontSize: '1rem',
+            cursor: 'pointer'
+        })
+    }
+
+    const filterRow = document.getElementById('filter-row')
+    if (filterRow) {
+        styleElement(filterRow, {
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: '20px',
+            padding: '0 20px',
+            marginBottom: '20px'
+        })
+    }
+}
+
 // ---- USER ACTION ----
 function filterByHouse(house) {
     activeHouse = house
@@ -382,6 +473,7 @@ function createStudent() {
 }
 
 // Start
+setupLayout()
 createHouseFilters()
 fetchData()
 document.getElementById('sorting-dropdown').addEventListener('change', handleAgeSorting)
