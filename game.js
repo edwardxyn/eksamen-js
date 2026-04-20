@@ -12,6 +12,7 @@ let allSpells = []
 let player = null
 let enemy = null
 let playerHand = []
+let enemyCount = 1
 const MAX_HAND = 7
 
 const houseColors = {
@@ -29,6 +30,14 @@ const CARD_TYPES = {
     draw: {
         color: '#7fd4ff',
         innerText: '🃏 Draw a card'
+    },
+    heal: {
+        color: '#7fff7f',
+        innerText: '❤️ Heal 100 HP'
+    },
+    shield: {
+        color: '#c77fff',
+        innerText: '🛡️ Block'
     }
 }
 
@@ -75,10 +84,15 @@ function getRandomCharacter(array) {
     if (character.hogwartsStudent === true) {
         character.isTeacher = false
         character.hp = 500
+        character.maxHp = 500
     } else {
         character.isTeacher = true
         character.hp = 800
+        character.maxHp = 800
     }
+
+    character.shield = 0
+    character.pendingShield = 0
 
     return character
 }
@@ -106,7 +120,13 @@ function displayCharacter(character, slot) {
     card.appendChild(img)
     card.appendChild(createTextElement('h2', character.name))
     card.appendChild(createTextElement('p', 'House: ' + character.house))
-    card.appendChild(createTextElement('p', 'HP: ' + character.hp))
+    card.appendChild(createTextElement('p', 'HP: ' + character.hp + ' / ' + character.maxHp))
+
+    if (character.shield > 0) {
+        const shieldEl = createTextElement('p', '🛡️ Shield: ' + character.shield)
+        styleElement(shieldEl, { color: '#c77fff', fontWeight: 'bold' })
+        card.appendChild(shieldEl)
+    }
 
     slot.innerHTML = ''
     slot.appendChild(card)
@@ -114,9 +134,15 @@ function displayCharacter(character, slot) {
 
 // ---- CARDS ----
 function generateCard() {
+    const roll = Math.random()
     let type = 'normal'
-    if (Math.random() < 0.15) {
+
+    if (roll < 0.10) {
         type = 'draw'
+    } else if (roll < 0.40) {
+        type = 'heal'
+    } else if (roll < 0.70) {
+        type = 'shield'
     }
 
     return {
@@ -192,15 +218,28 @@ function enemyAttack() {
         damage = Math.round(damage * 1.10)
     }
 
+    if (player.shield > 0) {
+        player.shield -= 1
+        logMessage(`🛡️ ${player.name}'s shield absorbed ${spell.name}!`, '#c77fff')
+        return
+    }
+
     player.hp -= damage
     logMessage(`${enemy.name} cast ${spell.name} for ${damage} damage!`, '#ff6b6b')
 }
 
 // ---- WIN / LOSE ----
 function nextEnemy() {
-    const remaining = allCharacters.filter(c => c.name !== player.name && c.name !== enemy.name)
-    enemy = getRandomCharacter(remaining)
+    enemyCount += 1
 
+    let pool
+    if (enemyCount % 5 === 0) {
+        pool = allCharacters.filter(c => c.hogwartsStudent === false && c.name !== player.name)
+    } else {
+        pool = allCharacters.filter(c => c.hogwartsStudent === true && c.name !== player.name && c.name !== enemy.name)
+    }
+
+    enemy = getRandomCharacter(pool)
     displayCharacter(enemy, enemySlot)
     logMessage(`⚡ New challenger: ${enemy.name}!`, 'gold')
 }
@@ -278,6 +317,22 @@ function playCard(index) {
     enemy.hp -= cardData.damage
     logMessage(`${player.name} cast ${cardData.name} for ${cardData.damage} damage!`, '#7fffd4')
 
+    if (cardData.type === 'draw') {
+        drawCard()
+    } else if (cardData.type === 'heal') {
+        const healAmount = 100
+        const before = player.hp
+        player.hp += healAmount
+        if (player.hp > player.maxHp) {
+            player.hp = player.maxHp
+        }
+        const healed = player.hp - before
+        logMessage(`${player.name} healed ${healed} HP!`, '#7fff7f')
+    } else if (cardData.type === 'shield') {
+        player.pendingShield += 1
+        logMessage(`${player.name} raised a shield!`, '#c77fff')
+    }
+
     displayCharacter(player, playerSlot)
     displayCharacter(enemy, enemySlot)
 
@@ -287,10 +342,6 @@ function playCard(index) {
         drawCard()
         renderHand()
         return
-    }
-
-    if (cardData.type === 'draw') {
-        drawCard()
     }
 
     enemyAttack()
@@ -305,6 +356,11 @@ function playCard(index) {
         return
     }
 
+    player.shield += player.pendingShield
+    player.pendingShield = 0
+
+    displayCharacter(player, playerSlot)
+
     drawCard()
     renderHand()
 }
@@ -313,7 +369,7 @@ function playCard(index) {
 function startGame() {
     const students = allCharacters.filter(c => c.hogwartsStudent === true)
     player = getRandomCharacter(students)
-    const remaining = allCharacters.filter(c => c.name !== player.name)
+    const remaining = allCharacters.filter(c => c.hogwartsStudent === true && c.name !== player.name)
     enemy = getRandomCharacter(remaining)
 
     displayCharacter(player, playerSlot)

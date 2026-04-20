@@ -206,7 +206,7 @@ function createCard(student) {
     const saveBtn = createTextElement('button', '🤍')
     const favorites = getFavorites()
     if (favorites.some(fav => fav.name === student.name)) {
-    saveBtn.textContent = '❤️'
+        saveBtn.textContent = '❤️'
     }
     saveBtn.addEventListener('click', function () {
         const currentFavs = getFavorites()
